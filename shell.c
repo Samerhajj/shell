@@ -19,7 +19,7 @@
 
 /* Convenience macro to silence compiler warnings about unused function parameters. */
 #define unused __attribute__((unused))
-
+#define MAX 100
 /* File descriptor for the shell input */
 int shell_terminal;
 
@@ -34,6 +34,8 @@ pid_t shell_pgid;
 
 int cmd_exit(struct tokens *tokens);
 int cmd_help(struct tokens *tokens);
+int cmd_pwd(struct tokens *tokens);
+int cmd_cd(struct tokens *tokens);
 
 /* Built-in command functions take token array (see parse.h) and return int */
 typedef int cmd_fun_t(struct tokens *tokens);
@@ -48,6 +50,8 @@ typedef struct fun_desc {
 fun_desc_t cmd_table[] = {
   {cmd_help, "?", "Show the help menu"},
   {cmd_exit, "exit", "Exit command shell"},
+  {cmd_pwd,"pwd","Prints current working directory"},
+  {cmd_cd,"cd","Changes the current working directory"}
 };
 
 /* Prints a helpful description for the given command */
@@ -60,6 +64,29 @@ int cmd_help(unused struct tokens *tokens) {
 /* Exits this shell */
 int cmd_exit(unused struct tokens *tokens) {
   exit(0);
+}
+
+/* Prints current working directory */
+int cmd_pwd(unused struct tokens *tokens)
+{
+  char pwd[MAX];
+  getcwd(pwd,sizeof(pwd));
+  fprintf(stdout,"%s\n",pwd);
+
+  return 1;
+}
+/* Changes current working directory */
+int cmd_cd(unused struct tokens *tokens)
+{
+  char *targ_dir=tokens_get_token(tokens,1);
+  if (targ_dir==NULL || strcmp(targ_dir,"~")==0)
+  {
+    targ_dir=getenv("HOME");
+  }
+  if(chdir(targ_dir))
+  {
+    fprintf(stdout,"No such file or directory\n");
+  }
 }
 
 /* Looks up the built-in command, if it exists. */
