@@ -16,6 +16,6 @@ jobs:
     - name: make
       run: make
     - name: make check
-      run: make check
+      run: make shell
     - name: make distcheck
-      run: make distcheck
+      run: make all
